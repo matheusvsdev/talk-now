@@ -13,9 +13,10 @@ public class ChatHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        if (session.getAttributes().containsKey("username")) {
+        if (session.getAttributes().containsKey("username") && session.getAttributes().containsKey("receiver")) {
             String username = session.getAttributes().get("username").toString();
-            talkNowService.connectUser(session);
+            String receiver = session.getAttributes().get("receiver").toString();
+            talkNowService.connectUser(session, username, receiver);
         } else {
             throw new Exception("O atributo 'username' não está presente na sessão");
         }
@@ -26,14 +27,17 @@ public class ChatHandler implements WebSocketHandler {
         if (message instanceof TextMessage) {
             TextMessage textMessage = (TextMessage) message;
             String content = textMessage.getPayload().toString();
-            if (session.getAttributes().containsKey("username")) {
-                String username = session.getAttributes().get("username").toString();
-                talkNowService.sendMessage(session, username, content);
-            } else {
-                throw new Exception("O atributo 'username' não está presente na sessão");
+            if (content != null) {
+                if (session.getAttributes().containsKey("username") && session.getAttributes().containsKey("receiver")) {
+                    String username = session.getAttributes().get("username").toString();
+                    String receiver = session.getAttributes().get("receiver").toString();
+                    talkNowService.sendMessage(session, username, receiver, content);
+                } else {
+                    throw new Exception("O atributo 'username' ou 'receiver' não está presente na sessão");
+                }
+            }  else {
+                throw new Exception("O conteúdo da mensagem é nulo");
             }
-        } else {
-            throw new Exception("O conteúdo da mensagem é nulo");
         }
     }
 
@@ -44,7 +48,12 @@ public class ChatHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        talkNowService.disconnectUser(session);
+        if (session.getAttributes().containsKey("username")) {
+            String username = session.getAttributes().get("username").toString();
+            talkNowService.disconnectUser(session, username);
+        } else {
+            throw new Exception("O atributo 'username' não está presente na sessão");
+        }
     }
 
     @Override

@@ -14,7 +14,9 @@ public class ChatInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         String username = request.getURI().getQuery().split("&")[0].split("=")[1];
+        String receiver = request.getURI().getQuery().split("&")[1].split("=")[1];
         attributes.put("username", username);
+        attributes.put("receiver", receiver);
         return true;
     }
 

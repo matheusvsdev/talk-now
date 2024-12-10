@@ -5,27 +5,27 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class TalkNowService {
 
-    private final Set<WebSocketSession> connectedUsers = new HashSet<>();
+    private final Map<String, WebSocketSession> connectedUsers = new HashMap<>();
 
-    public void sendMessage(WebSocketSession session, String username, String message) throws IOException {
-        for (WebSocketSession connectedSession : connectedUsers) {
-            if (connectedSession.equals(session)) {
-                connectedSession.sendMessage(new TextMessage(username + ": " + message));
-            }
+    public void sendMessage(WebSocketSession session, String username, String receiver, String message) throws IOException {
+        WebSocketSession receiverSession = connectedUsers.get(receiver);
+        if (receiverSession != null && receiverSession.isOpen()) {
+            receiverSession.sendMessage(new TextMessage(username + ": " + message));
         }
     }
 
-    public void connectUser(WebSocketSession session) {
-        connectedUsers.add(session);
+    public void connectUser(WebSocketSession session, String username, String receiver) throws IOException {
+        connectedUsers.put(username, session);
+        session.getAttributes().put("receiver", receiver);
     }
 
-    public void disconnectUser(WebSocketSession session) {
-        connectedUsers.remove(session);
+    public void disconnectUser(WebSocketSession session, String username) throws IOException {
+        connectedUsers.remove(username);
     }
 }
