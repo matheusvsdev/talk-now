@@ -8,9 +8,12 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
 
+// Classe interceptador de requisições HTTP(Usado para obter o nome do usuário e do destinatário a partir da URL do WebSocket
 @Component
 public class ChatInterceptor implements HandshakeInterceptor {
 
+    // Método é chamado antes de estabelecer a conexão WebSocket
+    // Obtém o nome do usuário e do destinatário a partir da URL do WebSocket e adiciona os atributos "username" e "receiver" à sessão
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         String username = request.getURI().getQuery().split("&")[0].split("=")[1];
@@ -20,6 +23,7 @@ public class ChatInterceptor implements HandshakeInterceptor {
         return true;
     }
 
+    // Método é chamado após estabelecer a conexão WebSocket(Não está sendo usado)
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
 
